@@ -3,6 +3,7 @@ package com.snuzj.football_player_list_view;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -63,8 +64,40 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, EditActivity.class);
             startActivityForResult(intent, EDIT_ACTIVITY_REQUEST_CODE);
         });
-    }
 
+        /*
+
+        //sửa dữ liệu cầu thủ
+        binding.customListview.setOnItemClickListener((parent, view, position, id) -> {
+            // Lấy dữ liệu của cầu thủ tại vị trí đã chọn
+            FootballPlayer selectedPlayer = playerArrayList.get(position);
+
+            Intent intent = new Intent(MainActivity.this, EditActivity.class);
+
+            // Đặt dữ liệu cầu thủ đã chọn vào intent
+            intent.putExtra("playerImageBitmap", selectedPlayer.getPlayer_img());
+            intent.putExtra("playerName", selectedPlayer.getPlayer_name());
+            intent.putExtra("playerNationality", selectedPlayer.getTeam_name());
+            intent.putExtra("playerDOB", selectedPlayer.getPlayer_dob());
+            intent.putExtra("nationImageBitmap", selectedPlayer.getNational_img());
+            intent.putExtra("clubImageBitmap", selectedPlayer.getClub_img());
+
+            // Bắt đầu EditActivity và mong đợi kết quả
+            startActivityForResult(intent, EDIT_ACTIVITY_REQUEST_CODE);
+        }); */
+
+        binding.customListview.setOnItemLongClickListener((parent, view, position, id) -> {
+            // Lấy dữ liệu của cầu thủ tại vị trí đã chọn
+            FootballPlayer selectedPlayer = playerArrayList.get(position);
+
+            // Hiển thị thông báo xác nhận trước khi xóa
+            showDeleteConfirmationDialog(selectedPlayer);
+
+            return true; // Trả về true để thông báo rằng sự kiện đã được xử lý
+        });
+
+
+    }
     private void setupListView() {
         listAdapter = new ItemAdapter(MainActivity.this, playerArrayList);
         binding.customListview.setAdapter(listAdapter);
@@ -116,6 +149,27 @@ public class MainActivity extends AppCompatActivity {
             playerArrayList.add(newPlayer);
             listAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void showDeleteConfirmationDialog(FootballPlayer player) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Xóa cầu thủ");
+        builder.setMessage("Bạn có chắc chắn muốn xóa cầu thủ " + player.getPlayer_name() + "?");
+        builder.setPositiveButton("Xóa", (dialog, which) -> {
+            // Xóa cầu thủ khi người dùng xác nhận
+            removePlayer(player);
+            dialog.dismiss();
+        });
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
+    private void removePlayer(FootballPlayer player) {
+        originalPlayerArrayList.remove(player);
+        playerArrayList.remove(player);
+        listAdapter.notifyDataSetChanged();
     }
 
 
